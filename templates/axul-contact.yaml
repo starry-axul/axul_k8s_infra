@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name}}-{{.Values.contact.name}}-api
+  namespace: {{ .Release.Name}}
+  labels:
+    app: {{.Values.contact.name}}
+    env: dev
+    project: axul
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{.Values.contact.name}}
+  template:
+    metadata:
+      labels:
+        app: {{.Values.contact.name}}
+    spec:
+      containers:
+      - name: {{.Values.contact.name}}
+        image: {{.Values.contact.image.url}}:{{.Values.contact.image.version}}
+        imagePullPolicy: Always
+        ports:
+        - containerPort: {{.Values.contact.port.http}}
+        envFrom: 
+            - configMapRef: 
+                name: {{ .Release.Name }}-{{.Values.contact.name}}-env
+            - secretRef: 
+                name: {{ .Release.Name }}-{{.Values.contact.name}}-secret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name}}-{{.Values.contact.name}}-api
+  namespace: {{ .Release.Name}}
+  labels:
+    app: {{.Values.contact.name}}
+    env: dev
+    project: axul
+spec:
+  type: NodePort
+  selector:
+    app: {{.Values.contact.name}}
+  ports:
+    - name: http
+      protocol: TCP
+      port: {{.Values.contact.port.http}}
+      targetPort: {{.Values.contact.port.http}}
+      nodePort: {{.Values.contact.port.node}}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-{{.Values.contact.name}}-env
+  namespace: {{ .Release.Name}}
+  labels:
+    app: {{ .Release.Name}}-{{.Values.contact.name}}-api
+data:
+  APP_URL: "0.0.0.0:8081"
+  ENVIRONMENT: "prod"
+  DATABASE_DEBUG: "true"
+  DATABASE_MIGRATE: "false"
+  BIRTHDAY_TITLE: "Cumpleaños de %s,%s"
+  BIRTHDAY_TEXT: "Cumpleaños de %s,%s. Acuerdate de saludarlo en su dia"
+  PAGINATOR_LIMIT_DEFAULT: "25"

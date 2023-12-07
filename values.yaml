@@ -1,0 +1,19 @@
+contact:
+  name: contact
+  image:
+    url: ncostamagna/axul_contact
+    version: 1.0.2
+  port:
+    http: 8081
+    node: 30003
+  replicas: 1
+
+event:
+  name: event
+  image:
+    url: ncostamagna/axul_event
+    version: v1.0.0
+  port:
+    http: 8082
+    node: 30002
+  replicas: 1
